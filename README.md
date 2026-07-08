@@ -1,82 +1,84 @@
 # ChatManager
 
-AI 编程助手对话记录浏览与管理工具。在本地查看、搜索、分析你的 OpenCode 对话历史，所有数据留在你的机器上。
+Local chat history viewer for AI coding agents. Browse, search, and visualize your OpenCode conversation history — all data stays on your machine.
 
-## 功能
+[中文文档](README.zh-CN.md)
 
-- **对话浏览** — 按会话列表查看完整对话，支持代码差异对比、消息折叠展开
-- **全文搜索** — FTS5 搜索引擎，支持按 Agent、时间范围筛选
-- **数据仪表盘** — 使用统计、成本追踪、Token 用量、模型/Agent 分布
-- **导出导入** — 导出会话为 `.db` 文件，也支持从其他机器导入
-- **书签标注** — 为重要会话添加书签和自定义标签
-- **暗色模式** — 明暗主题切换，自动跟随系统设置
+## Features
 
-## 快速开始
+- **Conversation Browser** — Browse all chat sessions with session list, message view, inline code diffs
+- **Full-Text Search** — Search across all conversations via FTS5, with agent/time filters
+- **Dashboard Analytics** — Usage stats, cost tracking, token usage, model/agent breakdowns
+- **Export & Import** — Export sessions to portable `.db` files, import from other machines
+- **Bookmarks & Tags** — Bookmark important sessions, add custom tags
+- **Dark Mode** — Light/dark theme with system preference auto-detect
 
-### 一键启动（Windows）
+## Quick Start
 
-1. 下载项目
-2. 双击 `首次安装.bat`（首次运行，自动安装依赖）
-3. 双击 `一键启动.bat` — 浏览器自动打开 http://localhost:5173
+### One-Click (Windows)
 
-### 手动安装
+1. Download the project
+2. Double-click `首次安装.bat` to install dependencies (first time only)
+3. Double-click `一键启动.bat` to launch — browser opens at http://localhost:5173
 
-**前置要求：** Python 3.11+，Node.js 18+
+### Manual Setup
+
+**Prerequisites:** Python 3.11+, Node.js 18+
 
 ```bash
-# 后端
+# Backend
 cd backend
 python -m venv venv
-venv\Scripts\activate          # Linux/macOS 用: source venv/bin/activate
+venv\Scripts\activate          # or `source venv/bin/activate` on macOS/Linux
 pip install -r requirements.txt
-python main.py                 # 自动探测 opencode.db 位置
+python main.py                 # auto-detects opencode.db location
 
-# 前端
+# Frontend
 cd frontend
 npm install
-npm run dev:all                # 单窗口同时启动前后端
+npm run dev:all                # starts backend + frontend in one terminal
 ```
 
-## 项目结构
+## Architecture
 
 ```
 ├── backend/
-│   ├── main.py                # FastAPI 入口（端口 8000）
-│   ├── db.py                  # SQLite 查询层（只读）
-│   ├── db_search.py           # FTS5 全文搜索引擎
-│   ├── db_import.py           # 多机数据导入管理
-│   └── routes/                # API 接口
+│   ├── main.py                # FastAPI entry (port 8000)
+│   ├── db.py                  # SQLite query layer (read-only)
+│   ├── db_search.py           # FTS5 search engine + cache
+│   ├── db_import.py           # Imported machine DB manager
+│   └── routes/                # API endpoints
 ├── frontend/
 │   ├── src/
-│   │   ├── components/        # React 组件（侧边栏、会话列表、仪表盘等）
-│   │   ├── hooks/             # 自定义 hooks
-│   │   └── lib/               # API 客户端、类型定义、工具函数
+│   │   ├── components/        # React components
+│   │   ├── hooks/             # useTheme, useBookmarks
+│   │   └── lib/               # API client, types, utilities
 │   ├── package.json
-│   └── vite.config.ts         # Vite 开发服务器（端口 5173，/api 代理到后端）
-├── 首次安装.bat                # 一键环境安装
-└── 一键启动.bat                # 一键启动服务
+│   └── vite.config.ts         # Vite (port 5173, proxies /api to :8000)
+├── 首次安装.bat                # One-click setup (Windows)
+└── 一键启动.bat                # One-click launch (Windows)
 ```
 
-## 技术栈
+## Tech Stack
 
-| 层级 | 技术 |
-|------|------|
-| 后端 | Python, FastAPI, SQLite3, uvicorn |
-| 前端 | React 19, TypeScript, Vite, Tailwind CSS v4 |
-| 搜索 | SQLite FTS5 外部内容表 |
-| 图表 | Recharts |
-| 数据获取 | TanStack React Query v5 |
+| Layer | Technology |
+|-------|-----------|
+| Backend | Python, FastAPI, SQLite3, uvicorn |
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS v4 |
+| Search | SQLite FTS5 |
+| Charts | Recharts |
+| Data | TanStack React Query v5 |
 
-## 数据来源
+## Data Source
 
-程序以只读方式连接 OpenCode 本地数据库，默认位置：
+Reads from OpenCode's local database (read-only). Default locations:
 
-| 系统 | 路径 |
-|------|------|
+| Platform | Path |
+|----------|------|
 | Windows | `%LOCALAPPDATA%\opencode\opencode.db` |
 | Linux | `~/.local/share/opencode/opencode.db` |
 | macOS | `~/Library/Application Support/opencode/opencode.db` |
 
-## 许可证
+## License
 
 MIT
