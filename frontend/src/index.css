@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  --bg:           oklch(97% 0.003 260);
+  --surface:      oklch(100% 0 0);
+  --surface-up:   oklch(94% 0.005 260);
+  --fg:           oklch(22% 0.015 260);
+  --fg-muted:     oklch(48% 0.012 260);
+  --fg-dim:       oklch(65% 0.008 260);
+  --primary:      oklch(55% 0.20 250);
+  --primary-glow: oklch(55% 0.20 250 / 0.12);
+  --ok:           oklch(52% 0.16 155);
+  --warn:         oklch(62% 0.18 65);
+  --err:          oklch(50% 0.22 25);
+  --border:       oklch(88% 0.008 260);
+  --border-faint: oklch(93% 0.005 260);
+
+  --part-reasoning: oklch(55% 0.18 300);
+  --part-tool:      oklch(55% 0.18 65);
+  --part-patch:     oklch(52% 0.16 155);
+
+  --diff-add: oklch(52% 0.16 155 / 0.12);
+  --diff-del: oklch(50% 0.22 25 / 0.12);
+
+  --font:         'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
+
+  --r-xs:    0.25rem;
+  --r-sm:    0.375rem;
+  --r:       0.75rem;
+  --r-lg:    1rem;
+  --r-xl:    1.5rem;
+  --r-full:  9999px;
+
+  --s-1:  0.25rem;
+  --s-2:  0.5rem;
+  --s-3:  0.75rem;
+  --s-4:  1rem;
+  --s-6:  1.5rem;
+  --s-8:  2rem;
+  --s-12: 3rem;
+
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:   150ms;
+  --dur-base:   250ms;
+  --dur-slow:   500ms;
+
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fg);
+  background: var(--bg);
+}
+
+/* 暗色模式 */
+[data-theme="dark"] {
+  --bg:           oklch(14% 0.005 260);
+  --surface:      oklch(18% 0.008 260);
+  --surface-up:   oklch(22% 0.010 260);
+  --fg:           oklch(90% 0.01 95);
+  --fg-muted:     oklch(60% 0.010 260);
+  --fg-dim:       oklch(42% 0.008 260);
+  --border:       oklch(28% 0.010 260);
+  --border-faint: oklch(20% 0.008 260);
+  --primary-glow: oklch(55% 0.20 250 / 0.2);
+  --diff-add:     oklch(52% 0.16 155 / 0.18);
+  --diff-del:     oklch(50% 0.22 25 / 0.18);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+#root { width: 100%; height: 100vh; display: flex; flex-direction: column; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--fg-dim); }
+
+.skeleton {
+  background: var(--surface-up);
+  border-radius: var(--r-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.6; }
+}
+
+.part-border-reasoning  { border-left: 3px solid var(--part-reasoning); }
+.part-border-tool       { border-left: 3px solid var(--part-tool); }
+.part-border-patch      { border-left: 3px solid var(--part-patch); }
+.part-border-system     { border-left: 3px solid var(--fg-dim); }
+
+.user-bubble {
+  background: var(--surface-up);
+  border-radius: var(--r-lg);
+  padding: var(--s-3) var(--s-4);
+  max-width: 85%;
+}
+
+.tool-panel {
+  border-left: 3px solid var(--part-tool);
+  margin: var(--s-2) 0;
+  padding-left: var(--s-3);
+}
+
+.tool-output {
+  background: var(--bg);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--r);
+  padding: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.code-inline {
+  background: var(--surface-up);
+  border-radius: var(--r-xs);
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.time-separator {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--fg-dim);
+  font-size: 12px;
+  padding: var(--s-3) 0;
+}
+.time-separator::before,
+.time-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-faint);
+}
+
+.diff-add-line { background: var(--diff-add); }
+.diff-del-line { background: var(--diff-del); }
+.diff-hunk-header { background: var(--surface); color: var(--fg-muted); font-family: var(--font-mono); font-size: 12px; padding: 2px var(--s-2); }
+

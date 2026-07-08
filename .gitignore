@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.env
+bookmarks.db
+venv/
+node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Application data
+backend/data/
+
+# Internal documents (kept locally, excluded from repo)
+AGENTS.md
+UI设计规范.md
+开发文档.md
