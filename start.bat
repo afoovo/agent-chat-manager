@@ -5,7 +5,7 @@ title ChatManager
 REM --- Env check ---
 if not exist "backend\venv\Scripts\python.exe" (
     echo [ERROR] Backend not set up
-    echo   Run "首次安装(setup).bat" first
+    echo   Run setup.bat first
     echo.
     pause
     exit /b 1
@@ -13,7 +13,7 @@ if not exist "backend\venv\Scripts\python.exe" (
 
 if not exist "frontend\node_modules" (
     echo [ERROR] Frontend not set up
-    echo   Run "首次安装(setup).bat" first
+    echo   Run setup.bat first
     echo.
     pause
     exit /b 1

@@ -94,6 +94,6 @@ if %DB_FOUND% equ 0 (
 echo.
 echo ============================================
 echo   Setup complete!
-echo   Double-click "一键启动(start).bat" to launch
+echo   Double-click start.bat to launch
 echo ============================================
 pause
