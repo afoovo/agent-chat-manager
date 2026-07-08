@@ -18,8 +18,8 @@ Local chat history viewer for AI coding agents. Browse, search, and visualize yo
 ### One-Click (Windows)
 
 1. Download the project
-2. Double-click `setup.bat` (`首次安装.bat`) to install dependencies (first time only)
-3. Double-click `start.bat` (`一键启动.bat`) to launch — browser opens at http://localhost:5173
+2. Double-click `首次安装(setup).bat` to install dependencies (first time only)
+3. Double-click `一键启动(start).bat` to launch — browser opens at http://localhost:5173
 
 ### Manual Setup
 
@@ -55,8 +55,8 @@ npm run dev:all                # starts backend + frontend in one terminal
 │   │   └── lib/               # API client, types, utilities
 │   ├── package.json
 │   └── vite.config.ts         # Vite (port 5173, proxies /api to :8000)
-├── setup.bat / 首次安装.bat    # One-click setup (Windows)
-└── start.bat / 一键启动.bat    # One-click launch (Windows)
+├── 首次安装(setup).bat         # One-click setup (Windows)
+└── 一键启动(start).bat         # One-click launch (Windows)
 ```
 
 ## Tech Stack
