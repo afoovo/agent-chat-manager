@@ -1,9 +1,9 @@
 import { useState, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getProjects, getSystemInfo, getImports, getImportProjects, uploadImport, deleteImport, exportAll } from '../lib/api';
+import { getProjects, getSystemInfo, getImports, getImportProjects, getImportConfig, updateImportConfig, uploadImport, deleteImport, exportAll } from '../lib/api';
 import type { ProjectItem } from '../lib/types';
-import { BarChart3, ChevronDown, ChevronRight, Folder, FolderOpen, HardDrive, Upload, Download, X, Sun, Moon } from 'lucide-react';
+import { BarChart3, ChevronDown, ChevronRight, Folder, FolderOpen, HardDrive, Upload, Download, X, Sun, Moon, Settings } from 'lucide-react';
 
 interface TreeNode {
   name: string;
@@ -81,12 +81,15 @@ export default function Sidebar({ theme, onToggleTheme }: { theme?: string; onTo
   const activeSource = searchParams.get('source');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
+  const [showImportConfig, setShowImportConfig] = useState(false);
+
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: projects } = useQuery({ queryKey: ['projects'], queryFn: getProjects });
   const { data: sysInfo } = useQuery({ queryKey: ['system-info'], queryFn: getSystemInfo });
   const { data: imports } = useQuery({ queryKey: ['imports'], queryFn: getImports });
+  const { data: importConfig } = useQuery({ queryKey: ['import-config'], queryFn: getImportConfig });
   const { data: importProjects } = useQuery({
     queryKey: ['import-projects', activeSource],
     queryFn: () => getImportProjects(activeSource!),
@@ -337,6 +340,60 @@ export default function Sidebar({ theme, onToggleTheme }: { theme?: string; onTo
             <Download size={14} /> 导出本机会话
           </button>
         </div>
+        <div style={{ marginTop: 'var(--s-2)' }}>
+          <button onClick={() => setShowImportConfig(!showImportConfig)} style={{
+            width: '100%', padding: '6px 12px', border: 'none', borderRadius: 'var(--r)',
+            background: 'transparent', color: 'var(--fg-muted)', cursor: 'pointer',
+            textAlign: 'left', fontSize: 13, display: 'flex', alignItems: 'center', gap: 'var(--s-2)',
+          }}>
+            <Settings size={14} /> {showImportConfig ? '收起设置' : '高级设置'}
+          </button>
+        </div>
+        {showImportConfig && importConfig && (
+          <div style={{
+            padding: 'var(--s-3)', marginTop: 'var(--s-1)',
+            borderRadius: 'var(--r)', background: 'var(--bg)',
+            fontSize: 11, color: 'var(--fg-dim)',
+          }}>
+            <div style={{ marginBottom: 4, fontWeight: 600 }}>导入目录</div>
+            <div style={{
+              padding: '4px 8px', borderRadius: 4,
+              background: 'var(--surface)', wordBreak: 'break-all',
+              marginBottom: 'var(--s-2)',
+            }}>
+              {importConfig.import_dir}
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--s-2)' }}>
+              <button onClick={() => {
+                const path = prompt('输入新的导入目录路径：', importConfig.import_dir);
+                if (path && path.trim()) {
+                  updateImportConfig(path.trim()).then(() => {
+                    queryClient.invalidateQueries({ queryKey: ['import-config'] });
+                    queryClient.invalidateQueries({ queryKey: ['imports'] });
+                    queryClient.invalidateQueries({ queryKey: ['import-projects'] });
+                  }).catch(console.error);
+                }
+              }} style={{
+                fontSize: 11, padding: '2px 8px', border: '1px solid var(--border)',
+                borderRadius: 4, background: 'var(--surface)', color: 'var(--fg)', cursor: 'pointer',
+              }}>
+                更改目录
+              </button>
+              <button onClick={() => {
+                updateImportConfig('data/imports').then(() => {
+                  queryClient.invalidateQueries({ queryKey: ['import-config'] });
+                  queryClient.invalidateQueries({ queryKey: ['imports'] });
+                  queryClient.invalidateQueries({ queryKey: ['import-projects'] });
+                }).catch(console.error);
+              }} style={{
+                fontSize: 11, padding: '2px 8px', border: '1px solid var(--border)',
+                borderRadius: 4, background: 'var(--surface)', color: 'var(--fg-dim)', cursor: 'pointer',
+              }}>
+                恢复默认
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );

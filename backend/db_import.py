@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sqlite3
 import zipfile
 import tempfile
@@ -7,15 +8,24 @@ import datetime
 import logging
 from collections import defaultdict
 
+import config as app_config
+
 logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-IMPORTS_DIR = os.path.join(BASE_DIR, "data", "imports")
-REGISTRY_FILE = os.path.join(IMPORTS_DIR, "registry.json")
+
+
+def _get_imports_dir() -> str:
+    cfg = app_config.load()
+    return app_config.get_import_dir(cfg)
+
+
+def _registry_file() -> str:
+    return os.path.join(_get_imports_dir(), "registry.json")
 
 
 def _ensure_dirs():
-    os.makedirs(IMPORTS_DIR, exist_ok=True)
+    os.makedirs(_get_imports_dir(), exist_ok=True)
 
 
 def connect_import(db_path: str) -> sqlite3.Connection:
@@ -26,10 +36,11 @@ def connect_import(db_path: str) -> sqlite3.Connection:
 
 
 def _load_registry() -> dict:
-    if not os.path.isfile(REGISTRY_FILE):
+    reg_file = _registry_file()
+    if not os.path.isfile(reg_file):
         return {}
     try:
-        with open(REGISTRY_FILE, "r", encoding="utf-8") as f:
+        with open(reg_file, "r", encoding="utf-8") as f:
             return json.load(f)
     except (json.JSONDecodeError, IOError):
         return {}
@@ -37,7 +48,7 @@ def _load_registry() -> dict:
 
 def _save_registry(reg: dict):
     _ensure_dirs()
-    with open(REGISTRY_FILE, "w", encoding="utf-8") as f:
+    with open(_registry_file(), "w", encoding="utf-8") as f:
         json.dump(reg, f, ensure_ascii=False, indent=2)
 
 
@@ -106,7 +117,7 @@ def save_import(zip_bytes: bytes) -> dict:
             if old_file and os.path.isfile(old_file):
                 os.unlink(old_file)
 
-        dest = os.path.join(IMPORTS_DIR, f"{machine}.db")
+        dest = os.path.join(_get_imports_dir(), f"{machine}.db")
         with open(dest, "wb") as f:
             f.write(db_data)
 
@@ -149,6 +160,41 @@ def resolve_import_path(machine: str) -> str | None:
         return None
     path = info.get("file", "")
     return path if os.path.isfile(path) else None
+
+
+def discover_imports(import_dir: str = None) -> int:
+    if import_dir is None:
+        import_dir = _get_imports_dir()
+    if not os.path.isdir(import_dir):
+        return 0
+
+    reg = _load_registry()
+    known = {info.get("file") for info in reg.values()}
+    added = 0
+
+    for fname in os.listdir(import_dir):
+        if not fname.endswith(".db"):
+            continue
+        full = os.path.join(import_dir, fname)
+        if full in known:
+            continue
+        try:
+            meta = _read_meta(full)
+            machine = meta.get("machine", os.path.splitext(fname)[0])
+            session_count = int(meta.get("session_count", 0))
+            reg[machine] = {
+                "file": os.path.abspath(full),
+                "session_count": session_count,
+                "imported_at": datetime.datetime.now().isoformat(),
+            }
+            logger.info("Discovered import: %s → %s (%d sessions)", fname, machine, session_count)
+            added += 1
+        except Exception:
+            continue
+
+    if added:
+        _save_registry(reg)
+    return added
 
 
 def get_import_projects(db_path: str) -> list[dict]:

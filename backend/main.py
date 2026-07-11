@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from db import resolve_db_path, resolve_session_diff_dir, check_schema as do_check
+import config as app_config
+import db_import
 import state
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s [%(name)s] %(message)s")
@@ -45,19 +47,32 @@ app.include_router(imports_router, prefix="/api")
 if __name__ == "__main__":
     import uvicorn
     parser = argparse.ArgumentParser()
-    parser.add_argument("--db", help="Path to opencode.db")
+    parser.add_argument("--db", help="Path to opencode.db (overrides config.json)")
     parser.add_argument("--check", action="store_true", help="Schema compatibility check")
     args = parser.parse_args()
 
-    try:
+    cfg = app_config.load()
+
+    if args.db:
         state.db_path = resolve_db_path(args.db)
-    except FileNotFoundError as e:
-        logger.error(str(e))
-        exit(1)
+    elif db_path := app_config.get_db_path(cfg):
+        state.db_path = resolve_db_path(db_path)
+    else:
+        try:
+            state.db_path = resolve_db_path(None)
+        except FileNotFoundError as e:
+            logger.error(str(e))
+            exit(1)
 
     state.diff_dir = resolve_session_diff_dir(state.db_path)
     logger.info("OpenCode db: %s", state.db_path)
     logger.info("Session diff dir: %s", state.diff_dir)
+
+    import_dir = app_config.get_import_dir(cfg)
+    logger.info("Import dir: %s", import_dir)
+    discovered = db_import.discover_imports(import_dir)
+    if discovered:
+        logger.info("Auto-discovered %d import(s)", discovered)
 
     if args.check:
         import json

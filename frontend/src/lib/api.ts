@@ -98,6 +98,12 @@ export const exportAll = () =>
 export const getImports = () =>
   api.get<any, ApiResponse<ImportItem[]>>('/imports').then(r => r.data);
 
+export const getImportConfig = () =>
+  api.get<any, ApiResponse<{ db_path: string | null; import_dir: string }>>('/imports/config').then(r => r.data);
+
+export const updateImportConfig = (import_dir: string) =>
+  api.put<any, ApiResponse<{ import_dir: string; imports: ImportItem[] }>>('/imports/config', { import_dir }).then(r => r.data);
+
 export const uploadImport = (file: File) => {
   const fd = new FormData();
   fd.append('file', file);

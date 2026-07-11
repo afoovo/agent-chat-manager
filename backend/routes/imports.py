@@ -1,10 +1,51 @@
 from fastapi import APIRouter, Query, UploadFile, File
 from fastapi.responses import JSONResponse
+import os
 import db
 import db_import
+import config as app_config
 import bookmarks
 
 router = APIRouter()
+
+
+@router.get("/imports/config")
+def get_import_config():
+    cfg = app_config.load()
+    return {
+        "code": 200, "msg": "ok",
+        "data": {
+            "db_path": cfg.get("db_path"),
+            "import_dir": app_config.get_import_dir(cfg),
+        }
+    }
+
+
+@router.put("/imports/config")
+def update_import_config(body: dict):
+    import_dir = body.get("import_dir", "").strip()
+    if not import_dir:
+        return JSONResponse(status_code=400, content={"code": 400, "msg": "import_dir 不能为空", "data": None})
+
+    cfg = app_config.load()
+    old_dir = app_config.get_import_dir(cfg)
+
+    cfg["import_dir"] = import_dir
+    app_config.save(cfg)
+    new_dir = app_config.get_import_dir(cfg)
+
+    if os.path.isdir(old_dir) and old_dir != new_dir:
+        reg_file = os.path.join(old_dir, "registry.json")
+        if os.path.isfile(reg_file):
+            try:
+                import shutil
+                shutil.copy2(reg_file, os.path.join(new_dir, "registry.json"))
+            except Exception:
+                pass
+
+    db_import.discover_imports(new_dir)
+    imports = db_import.get_imports()
+    return {"code": 200, "msg": "已更新", "data": {"import_dir": new_dir, "imports": imports}}
 
 
 @router.get("/imports")
